@@ -39,11 +39,31 @@ if st.button("조회"):
 
         st.subheader(f"📊 {ticker.upper()} 요약")
 
-        # 전일 종가 카드
-        st.metric(
-            label="전일 종가",
-            value=f"${close_price:.2f}"
-        )
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                label="Previous Close",
+                value=f"${close_price:.2f}",
+            )
+
+        with col2:
+            st.metric(
+                label="RSI",
+                value="32.4",
+            )
+
+        with col3:
+            st.metric(
+                label="20-Day Moving Average",
+                value="$228.10",
+            )
+
+        with col4:
+            st.metric(
+                label="VIX",
+                value="19.3",
+            )
 
         st.caption(f"기준일 : {close_date.strftime('%Y-%m-%d')}")
 
