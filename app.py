@@ -2,6 +2,7 @@ import streamlit as st
 from indicators.moving_average import calculate_moving_average
 from indicators.rsi import calculate_rsi
 from data.market import get_last_close, get_vix_value
+from helpers.status import get_rsi_status, get_ma_status, get_vix_status
 
 
 def extract_close_series(df):
@@ -12,29 +13,24 @@ def extract_close_series(df):
 
 
 def render_metric_cards(close_price, latest_rsi, latest_ma20, latest_ma60, vix_value):
-    if latest_rsi <= 30:
-        rsi_label = "RSI (과매도)"
-        rsi_value = f"🟢 {latest_rsi:.1f}"
-    elif latest_rsi >= 70:
-        rsi_label = "RSI (과매수)"
-        rsi_value = f"🔴 {latest_rsi:.1f}"
-    else:
-        rsi_label = "RSI (중립)"
-        rsi_value = f"⚪ {latest_rsi:.1f}"
+    rsi_emoji, rsi_status = get_rsi_status(latest_rsi)
+    ma20_emoji, ma20_status = get_ma_status(close_price, latest_ma20)
+    ma60_emoji, ma60_status = get_ma_status(close_price, latest_ma60)
+    vix_emoji, vix_status = get_vix_status(vix_value)
 
     metrics = [
         ("Previous Close", f"${close_price:.2f}"),
-        (rsi_label, rsi_value),
-        ("20-Day MA", f"${latest_ma20:.2f}"),
-        ("60-Day MA", f"${latest_ma60:.2f}"),
-        ("VIX", f"{vix_value:.1f}" if vix_value else "N/A"),
+        (f"RSI ({rsi_status})", f"{rsi_emoji} {latest_rsi:.1f}"),
+        (f"20-Day MA ({ma20_status})", f"{ma20_emoji} ${latest_ma20:.2f}"),
+        (f"60-Day MA ({ma60_status})", f"{ma60_emoji} ${latest_ma60:.2f}"),
+        (f"VIX ({vix_status})", f"{vix_emoji} {vix_value:.1f}" if vix_value is not None else "⚪ N/A"),
     ]
 
     columns = st.columns(len(metrics))
+
     for column, (label, value) in zip(columns, metrics):
         with column:
             st.metric(label=label, value=value)
-
 
 def render_price_chart(close_series):
     st.subheader("📈 최근 5일 종가 추이")
